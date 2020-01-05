@@ -30,8 +30,8 @@ class SteamDBService:
             self.getPlayersHistory(_id, name)
             print(i)
             if (i != 0) and (i % 900) == 0:
-                logger.info('Waiting 10 seconds to prevent crawl..')
-                time.sleep(30)
+                logger.info('Waiting 60 seconds to prevent crawl..')
+                time.sleep(60)
             else:
                 time.sleep(0.05)
         return res
@@ -40,6 +40,10 @@ class SteamDBService:
         history = self.accessor.getPlayersHistory(app_id, QueryMode.FULL)
         if (history['success']):
             return self.mkRes(app_id, app_name, history)
+        elif (history.get('error') is not None and 'crawl' in history['error']):
+            logger.info('SteamDB temporary blocked us. waiting 30 seconds, then try again')
+            time.sleep(60)
+            return self.getPlayersHistory(app_id, app_name)
         else: 
             logger.info('No players history data for %s', app_name)
             return {}
