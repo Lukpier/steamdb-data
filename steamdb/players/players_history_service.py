@@ -7,20 +7,14 @@ logger = logging.getLogger(__name__)
 logging.basicConfig()
 logger.setLevel(logging.DEBUG)
 
-concurrent = 200
 batch = 900
+seconds_to_wait = 60
 
-class SteamDBService:
+class PlayersHistoryService:
 
     def __init__(self):
         self.accessor = SteamDBAccessor()
-    
-    def collectLastWeekPlayerHistories(self):
-        logger.info('Retrieving all app ids from steam api...')
-        apps = self.accessor.getAppIds()['applist']['apps']
-        logger.info('Done. Start collecting players history for %s apps', len(apps))
-        return self.getPlayersHistories(apps)
-
+        
     def getPlayersHistories(self, apps: list) -> list:
         res = []
         for i, app in enumerate(apps):
@@ -29,9 +23,9 @@ class SteamDBService:
             logger.info('Querying steam db api for %s', name)
             self.getPlayersHistory(_id, name)
             print(i)
-            if (i != 0) and (i % 900) == 0:
-                logger.info('Waiting 60 seconds to prevent crawl..')
-                time.sleep(60)
+            if (i != 0) and (i % batch) == 0:
+                logger.info('Waiting %i seconds to prevent crawl..', seconds_to_wait)
+                time.sleep(seconds_to_wait)
             else:
                 time.sleep(0.05)
         return res
@@ -41,8 +35,8 @@ class SteamDBService:
         if (history['success']):
             return self.mkRes(app_id, app_name, history)
         elif (history.get('error') is not None and 'crawl' in history['error']):
-            logger.info('SteamDB temporary blocked us. waiting 30 seconds, then try again')
-            time.sleep(60)
+            logger.info('SteamDB temporary blocked us. waiting %i seconds, then try again', seconds_to_wait)
+            time.sleep(seconds_to_wait)
             return self.getPlayersHistory(app_id, app_name)
         else: 
             logger.info('No players history data for %s', app_name)
