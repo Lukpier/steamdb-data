@@ -18,7 +18,7 @@ class SteamDBAccessor:
             'Accept': 'application/json',
             'Referer': 'https://steamdb.info/'
         }
-        with open('steamdb/user_agents.json') as f:
+        with open('steamdb_crawler/steamdb/user_agents.json') as f:
             self.user_agents = json.load(f)
 
     def getAppIds(self):

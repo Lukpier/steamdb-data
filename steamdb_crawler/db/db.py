@@ -7,9 +7,9 @@ from abc import ABC, abstractmethod
 class DataLake(ABC):
 
     @abstractmethod
-    def write(self, records: list, table: str):
+    def write(self, records: list, table: str) -> bool:
         pass
 
     @abstractmethod
-    def read(self, table: str):
+    def read(self, table: str) -> list:
         pass

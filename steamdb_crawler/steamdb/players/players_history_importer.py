@@ -12,10 +12,11 @@ class PlayersHistoryImporter:
         self.service = PlayersHistoryService()
         self.db = db
 
-    def start(self, app_numbers: int = None):
+    def ingest(self, app_numbers: int = None):
         logger.info('reading app ids list from db..')
         apps = self.db.read('steam_apps')
         if (app_numbers is not None):
             apps = apps[:app_numbers]
         player_histories = self.service.getPlayersHistories(apps)
         self.db.write(player_histories, 'players_histories')
+        logger.info('Done.')

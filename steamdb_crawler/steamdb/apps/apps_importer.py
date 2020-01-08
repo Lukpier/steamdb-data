@@ -13,19 +13,10 @@ class AppsImporter:
         self.accessor = SteamDBAccessor() 
         self.db = db
 
-    def start(self):
+    def ingest(self):
         logger.info('Retrieving all app ids from steam api...')
         apps = self.accessor.getAppIds()
         apps = apps['applist']['apps']
-        logger.info('Writing %i  to db', len(apps))
+        logger.info('Writing %i apps to db', len(apps))
         self.db.write(apps, 'steam_apps')
         logger.info('Done.')
-
-
-def start(db_type = 'file'):
-    if db_type == 'file':
-        db = JsonFileDB()
-        importer = AppsImporter(db)
-        importer.start()
-
-start()

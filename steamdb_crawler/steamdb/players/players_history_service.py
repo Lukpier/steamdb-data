@@ -21,8 +21,8 @@ class PlayersHistoryService:
             name = app['name']
             _id = app['appid']
             logger.info('Querying steam db api for %s', name)
-            self.getPlayersHistory(_id, name)
-            print(i)
+            history = self.getPlayersHistory(_id, name)
+            res.append(history)
             if (i != 0) and (i % batch) == 0:
                 logger.info('Waiting %i seconds to prevent crawl..', seconds_to_wait)
                 time.sleep(seconds_to_wait)
@@ -33,18 +33,18 @@ class PlayersHistoryService:
     def getPlayersHistory(self, app_id: str, app_name: str) -> dict:
         history = self.accessor.getPlayersHistory(app_id, QueryMode.FULL)
         if (history['success']):
-            return self.mkRes(app_id, app_name, history)
+            return self.mkRes(app_id, app_name, history['data'])
         elif (history.get('error') is not None and 'crawl' in history['error']):
             logger.info('SteamDB temporary blocked us. waiting %i seconds, then try again', seconds_to_wait)
             time.sleep(seconds_to_wait)
             return self.getPlayersHistory(app_id, app_name)
         else: 
             logger.info('No players history data for %s', app_name)
-            return {}
+            return self.mkRes(app_id, app_name, {})
 
     def mkRes(self, app_id: str, app_name: str, history: dict):
         r = {}
         r['app_name'] = app_name
         r['app_id'] = app_id
-        r['players_history'] = history['data']
+        r['players_history'] = history
         return r
