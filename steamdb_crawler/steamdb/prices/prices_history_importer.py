@@ -6,7 +6,7 @@ logging.basicConfig()
 logger = logging.getLogger()
 logger.setLevel(logging.DEBUG)
 
-class PlayersHistoryImporter:
+class PricesHistoryImporter:
 
     def __init__(self, db: DataLake):
         self.service = SteamDBService()
@@ -17,6 +17,6 @@ class PlayersHistoryImporter:
         apps = self.db.read('steam_apps')
         if (app_numbers is not None):
             apps = apps[:app_numbers]
-        player_histories = self.service.retrieveData(apps, 'players')
-        self.db.write(player_histories, 'players_histories')
+        player_histories = self.service.retrieveData(apps, 'prices')
+        self.db.write(player_histories, 'prices_histories')
         logger.info('Done.')
