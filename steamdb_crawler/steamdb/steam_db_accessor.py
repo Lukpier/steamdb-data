@@ -5,6 +5,7 @@ import json
 import random
 import os
 import logging
+import time
 
 logger = logging.getLogger(__name__)
 logging.basicConfig()
@@ -38,8 +39,8 @@ class SteamDBAccessor:
 
     def queryWithRandomUserAgent(self, service_url) -> dict:
         headers = self.randomUserAgentToHeaders(self.user_agents)
-        r = self.dataAccessor.get(service_url, headers = headers)
-        try:
+        try:        
+            r = self.dataAccessor.get(service_url, headers = headers)
             return json.loads(r)
         except json.decoder.JSONDecodeError:
             # try with a different user-agent (some may cause problems)
@@ -47,6 +48,10 @@ class SteamDBAccessor:
             logger.info('Encountered problems which may have been caused by wrong user agent. removing it from list')
             logger.info('trying again')
             self.user_agents.remove(headers['User-Agent'])
+            return self.queryWithRandomUserAgent(service_url)
+        except TimeoutError:
+            logger.info("Timeout handled. Trying again..")
+            time.sleep(60)
             return self.queryWithRandomUserAgent(service_url)
 
        

@@ -2,3 +2,4 @@
 .vscode/*
 Untitled.code-workspace
 *.pyc
+steamdb_crawler/output/datalake/*

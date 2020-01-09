@@ -1,6 +1,6 @@
 import os
 import sys
-from multiprocessing import Process
+from threading import Thread
 from steamdb.apps.apps_importer import AppsImporter
 from steamdb.players.players_history_importer import PlayersHistoryImporter
 from steamdb.prices.prices_history_importer import PricesHistoryImporter
@@ -13,7 +13,7 @@ if os.path.exists(os.path.join("steamdb", "apps", "apps_importer.py")):
 def runInParallel(*fns):
   proc = []
   for fn in fns:
-    p = Process(target=fn)
+    p = Thread(target=fn)
     p.start()
     proc.append(p)
   for p in proc:
@@ -27,5 +27,6 @@ if __name__ == "__main__":
     
     apps_importer.ingest()
 
-    runInParallel(players_importer.ingest, prices_importer.ingest)
-    
+    #runInParallel(players_importer.ingest, prices_importer.ingest)
+    players_importer.ingest()
+    prices_importer.ingest()
