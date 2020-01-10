@@ -22,11 +22,11 @@ def runInParallel(*fns):
 if __name__ == "__main__":
     db = JsonFileDB() # todo: parametrize
     apps_importer = AppsImporter(db)
-    players_importer = PlayersHistoryImporter(db)
+   # players_importer = PlayersHistoryImporter(db)
     prices_importer = PricesHistoryImporter(db)
     
     apps_importer.ingest()
 
     #runInParallel(players_importer.ingest, prices_importer.ingest)
-    players_importer.ingest()
+    #players_importer.ingest()
     prices_importer.ingest()

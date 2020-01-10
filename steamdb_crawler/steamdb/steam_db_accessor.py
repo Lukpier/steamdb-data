@@ -1,4 +1,5 @@
 from common.requests_api import RequestsApi
+from common.exceptions import RetriableError
 from steamdb.query_mode import QueryMode
 app_id = "292030" # the witcher 3 app id on steam
 import json
@@ -45,14 +46,17 @@ class SteamDBAccessor:
         except json.decoder.JSONDecodeError:
             # try with a different user-agent (some may cause problems)
             # remove user agent
-            logger.info('Encountered problems which may have been caused by wrong user agent. removing it from list')
+            logger.info('Encountered problems which may have been caused by wrong user agent')
             logger.info('trying again')
-            self.user_agents.remove(headers['User-Agent'])
-            return self.queryWithRandomUserAgent(service_url)
+            #self.user_agents.remove(headers['User-Agent'])
+            raise RetriableError
         except TimeoutError:
             logger.info("Timeout handled. Trying again..")
             time.sleep(60)
-            return self.queryWithRandomUserAgent(service_url)
+            raise RetriableError
+        except Exception as e:
+            logger.error("bad answer from server --------> error: %s", e)
+            raise RetriableError
 
        
     def randomUserAgentToHeaders(self, user_agent_list: list) -> dict:

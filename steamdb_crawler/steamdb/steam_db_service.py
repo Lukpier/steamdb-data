@@ -1,4 +1,5 @@
 from steamdb.steam_db_accessor import SteamDBAccessor
+from common.exceptions import RetriableError
 from steamdb.query_mode import QueryMode
 import logging
 import time
@@ -39,16 +40,20 @@ class SteamDBService:
         return res
 
     def getDataForApp(self, app_id: str, app_name: str, queryFn) -> dict:
-        history = queryFn(app_id)
-        if (history['success']):
-            return self.mkRes(app_id, app_name, history['data'])
-        elif (history.get('error') is not None and 'crawl' in history['error']):
-            logger.warning('SteamDB temporary blocked us. waiting %i seconds, then try again', seconds_to_wait)
-            time.sleep(seconds_to_wait)
+        try:
+            history = queryFn(app_id)
+            if (history['success']):
+                return self.mkRes(app_id, app_name, history['data'])
+            elif (history.get('error') is not None and 'crawl' in history['error']):
+                logger.warning('SteamDB temporary blocked us. waiting %i seconds, then try again', seconds_to_wait)
+                time.sleep(seconds_to_wait)
+                return self.getDataForApp(app_id, app_name, queryFn)
+            else: 
+                logger.debug('No players history data for %s', app_name)
+                return self.mkRes(app_id, app_name, {})
+        except RetriableError:
+            time.sleep(1)
             return self.getDataForApp(app_id, app_name, queryFn)
-        else: 
-            logger.debug('No players history data for %s', app_name)
-            return self.mkRes(app_id, app_name, {})
 
     def mkRes(self, app_id: str, app_name: str, history: dict):
         r = {}

@@ -1,0 +1,2 @@
+class RetriableError(Exception):
+    pass
